@@ -1,0 +1,14 @@
+{
+  "db": {
+    "migrate": false,
+    "mongo": {
+      "uri": "mongodb://localhost:27017",
+      "dbName": "contribute",
+      "collection": "contribute"
+    },
+    "storageFile": "validator.db"
+  },
+  "server": {
+    "port": 3300
+  }
+}
