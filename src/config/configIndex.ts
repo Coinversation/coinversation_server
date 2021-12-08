@@ -7,6 +7,10 @@ export type Config = {
       uri: string;
     };
   };
+  telemetry: {
+    chains: string[];
+    host: string;
+  };
   server: {
     port: number;
   };

@@ -3,11 +3,13 @@ import Database from "./db/dbIndex";
 import Server from "./server/serverIndex";
 import { loadConfigDir } from "./config/configIndex";
 import logger from "./logger/loggerIndex";
-
+// import TelemetryClient from "./telemetry/telemetryIndex";
 const start = async (cmd: { config: string }) => {
   const config = loadConfigDir(cmd.config);
   const db = await Database.create(config.db.mongo.uri);
   logger.info(`db ok`);
+
+  // const telemetry = new TelemetryClient(config, db);
 
   const server = new Server(db, config);
   server.start();

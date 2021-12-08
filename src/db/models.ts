@@ -1,10 +1,10 @@
-import { Schema } from "mongoose"
+import { Schema } from "mongoose";
 
 export const ContributeSchema = new Schema({
-  id: Number,
-  timeAt: {type:Number, default: 0},
-  address: String,
+  id: Schema.Types.ObjectId,
+  at: String,
   amount: String,
-  source: String,
-  publickey: String
-})
+  publickey: String,
+  block: String,
+  sources: String,
+});

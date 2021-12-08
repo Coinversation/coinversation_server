@@ -6,9 +6,11 @@ import { ContributeSchema } from "./models";
 export default class Db {
   private contributeModel;
   constructor() {
-    this.contributeModel = mongoose.model("Contribute", ContributeSchema);
+    this.contributeModel = mongoose.model("contribute", ContributeSchema);
   }
-  static async create(uri = "mongodb://localhost:27017/otv"): Promise<Db> {
+  static async create(
+    uri = "mongodb://localhost:27017/contribute"
+  ): Promise<Db> {
     mongoose.connect(uri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -16,9 +18,9 @@ export default class Db {
     return new Promise((resolve, reject) => {
       mongoose.connection.once("open", async () => {
         const db = new Db();
-        // if (!(await db.getLastNominatedEraIndex())) {
-        //   await db.setLastNominatedEraIndex(0);
-        // }
+        if (!(await db.getLastNominatedEraIndex())) {
+          await db.setLastNominatedEraIndex(0);
+        }
         resolve(db);
       });
       mongoose.connection.on("error", (err) => {
@@ -49,20 +51,36 @@ export default class Db {
     );
   }
   async getLastNominatedEraIndex(): Promise<any> {
-    return this.contributeModel
-      .findOne({
-        id: /[0-9]+/,
-      })
-      .exec();
+    return this.contributeModel.find().exec();
   }
-  async contributeAdd(publickey: string): Promise<any> {
-    console.log(publickey);
-    let data = await this.contributeModel
-      .findOne({
-        publickey: publickey,
-      })
-      .exec();
 
+  async contributeGetLast(): Promise<any> {
+    let data = await this.contributeModel
+      .find()
+      // .sort({ block: -1 })
+      // .limit(1)
+      .exec();
+    return data[data.length - 1];
+  }
+  async contributeGet(publickey: string): Promise<any> {
+    let data = await this.contributeModel.find().exec();
+    return data;
+  }
+  async contributeAdd(
+    block: string,
+    at: string,
+    amount: string,
+    publickey: string,
+    sources: string // bifrost, parallel, coinversation, polkadotOfficial
+  ): Promise<any> {
+    let data = await this.contributeModel.create({
+      block: block,
+      at: at,
+      amount: amount,
+      publickey: publickey,
+      sources: sources,
+    });
+    console.log(data);
     return data;
   }
 }
