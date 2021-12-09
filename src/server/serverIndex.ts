@@ -13,6 +13,8 @@ const API = {
   ContributeAdd: "/api/contribute/add",
   ContributeGet: "/api/contribute/get",
   ContributeGetLast: "/api/contribute/get/last",
+  ContributeGetList: "/api/contribute/get/list",
+  ContributeDelete: "/api/contribute/delete",
 };
 
 export default class Server {
@@ -30,13 +32,15 @@ export default class Server {
 
     const router = new Router();
     router.post(API.ContributeAdd, async (ctx) => {
-      const { block, at, amount, publickey, sources } = ctx.request.body;
+      const { block, at, amount, publickey, sources, address } =
+        ctx.request.body;
       const a = await this.db.contributeAdd(
         block,
         at,
         amount,
         publickey,
-        sources
+        sources,
+        address
       );
       this.io.to(latestBlocksRoom).emit("latestBlocks", "simpleBlocks");
       ctx.body = {
@@ -45,8 +49,7 @@ export default class Server {
       };
     });
     router.get(API.ContributeGet, async (ctx) => {
-      const { publickey } = ctx.query;
-      const a = await this.db.contributeGet(publickey);
+      const a = await this.db.contributeGet();
       ctx.body = {
         code: "200",
         data: a,
@@ -58,6 +61,37 @@ export default class Server {
         code: "200",
         data: a,
       };
+    });
+    router.get(API.ContributeGetList, async (ctx) => {
+      const { publickey } = ctx.query;
+      let total: number;
+      if (publickey) {
+        total = await this.db.contributeGetBalance(publickey);
+      }
+      const list = await this.db.contributeGetList();
+      ctx.body = {
+        code: "200",
+        data: {
+          ...list,
+          total: total,
+        },
+      };
+    });
+    router.get(API.ContributeDelete, async (ctx) => {
+      const { publickey } = ctx.query;
+      console.log(publickey);
+      if (publickey) {
+        const data = await this.db.contributeAllRemove(publickey);
+        ctx.body = {
+          code: "200",
+          data: data,
+        };
+      } else {
+        ctx.body = {
+          code: "401",
+          msg: "publickey none",
+        };
+      }
     });
 
     this.app.use(router.routes());

@@ -7,4 +7,5 @@ export const ContributeSchema = new Schema({
   publickey: String,
   block: String,
   sources: String,
+  address: String,
 });
