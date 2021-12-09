@@ -8,15 +8,16 @@ import { latestBlocksRoom } from "../io/constant";
 import { Config } from "../config/configIndex";
 import Database from "../db/dbIndex";
 import logger from "../logger/loggerIndex";
-
+import fetch from "cross-fetch";
 const API = {
   ContributeAdd: "/api/contribute/add",
   ContributeGet: "/api/contribute/get",
   ContributeGetLast: "/api/contribute/get/last",
   ContributeGetList: "/api/contribute/get/list",
   ContributeDelete: "/api/contribute/delete",
+  rate: "/api/rate",
+  pnsStatus: "/api/pns/status",
 };
-
 export default class Server {
   public app: Koa;
   private db: Database;
@@ -77,6 +78,15 @@ export default class Server {
         },
       };
     });
+    router.get(API.pnsStatus, async (ctx) => {
+      const { publickey } = ctx.query;
+      let total = await this.db.contributeGetBalance(publickey);
+      ctx.body = {
+        code: "200",
+        data: +total > 10 ? true : false,
+      };
+    });
+
     router.get(API.ContributeDelete, async (ctx) => {
       const { publickey } = ctx.query;
       console.log(publickey);
@@ -92,6 +102,29 @@ export default class Server {
           msg: "publickey none",
         };
       }
+    });
+    router.get(API.rate, async (ctx) => {
+      const response = await fetch(
+        `https://www.mexc.com/open/api/v2/market/ticker`,
+        {
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "access-control-allow-credentials": "true",
+          },
+        }
+      );
+      const data = await response.json();
+      let rate = {};
+      if (data.code === 200) {
+        if (data.data.length) {
+          rate = data.data.filter((v) => v.symbol === "CTO_USDT")[0];
+        }
+      }
+      console.log(rate);
+      ctx.body = {
+        code: "200",
+        data: rate,
+      };
     });
 
     this.app.use(router.routes());
