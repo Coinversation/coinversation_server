@@ -15,6 +15,7 @@ const API = {
   ContributeGetLast: "/api/contribute/get/last",
   ContributeGetList: "/api/contribute/get/list",
   ContributeDelete: "/api/contribute/delete",
+  ContributeListOfWinners: "/api/contribute/list/winners",
   rate: "/api/rate",
   pnsStatus: "/api/pns/status",
 };
@@ -33,7 +34,7 @@ export default class Server {
 
     const router = new Router();
     router.post(API.ContributeAdd, async (ctx) => {
-      const { block, at, amount, publickey, sources, address } =
+      const { block, at, amount, publickey, sources, address, hash } =
         ctx.request.body;
       const a = await this.db.contributeAdd(
         block,
@@ -41,7 +42,8 @@ export default class Server {
         amount,
         publickey,
         sources,
-        address
+        address,
+        hash
       );
       this.io.to(latestBlocksRoom).emit("latestBlocks", "simpleBlocks");
       ctx.body = {
@@ -84,6 +86,13 @@ export default class Server {
       ctx.body = {
         code: "200",
         data: +total > 10 ? true : false,
+      };
+    });
+    router.get(API.ContributeListOfWinners, async (ctx) => {
+      let data = await this.db.contributeListOfWinners();
+      ctx.body = {
+        code: "200",
+        data: data,
       };
     });
 

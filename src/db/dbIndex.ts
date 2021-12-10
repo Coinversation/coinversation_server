@@ -73,6 +73,10 @@ export default class Db {
     }
     return total;
   }
+  async contributeListOfWinners(): Promise<any> {
+    let data = await this.contributeModel.find().exec();
+    return data.length > 1 ? [data[data.length - 1]] : data;
+  }
   async contributeGetList(): Promise<any> {
     let data = await this.contributeModel.find().exec();
 
@@ -107,7 +111,8 @@ export default class Db {
     amount: string,
     publickey: string,
     sources: string, // bifrost, parallel, coinversation, polkadotOfficial
-    address: string
+    address: string,
+    hash: string
   ): Promise<any> {
     let data = await this.contributeModel.create({
       block: block,
@@ -116,6 +121,7 @@ export default class Db {
       publickey: publickey,
       sources: sources,
       address: address,
+      hash: hash,
     });
     return data;
   }
